@@ -1,11 +1,13 @@
-# Ignora todo el contenido de la carpeta public
+# Ignorar el archivo .env
+.env
+# Ignorar todo el contenido de la carpeta public
 public/*
 
-# ¡Excepto la carpeta public misma!
+# Exceptuar la carpeta public misma
 !public/
 
 # Permitir que se suba un archivo vacío para asegurar que la carpeta exista en el repositorio
 !public/.gitkeep
 
-# Ignora la carpeta node_modules
+# Ignorar la carpeta node_modules
 node_modules/

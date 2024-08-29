@@ -1,60 +1,57 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer')
-const fs = require('fs');
+const multer = require('multer');
+const crypto = require('crypto');
+require('dotenv').config(); // Cargar las variables de entorno desde el archivo .env
 
+// Configuración de almacenamiento
 const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const ext = file.originalname.split(".").pop();
-    const fileName = Date.now();
-    //cb(null, `${fileName}.${ext}`); 
-    cb(null, file.originalname);
+    const uniqueSuffix = crypto.randomBytes(6).toString('hex');
+    const fileName = `${uniqueSuffix}.${ext}`;
+    cb(null, fileName);
   },
   destination: function (req, file, cb) {
     cb(null, `./public`);
   },
 });
 
-const upload = multer({ storage });
+// Configuración de Multer, incluyendo límite de tamaño de archivo
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Límite de 10 MB
+});
 
 router.post('/', upload.single('file'), (req, res) => {
-  console.log('llego ala ruta');
-  const file = req.file.filename;
-  console.log('Subio Archivo')
-  res.status(200).send('http://localhost:7000/' + file);
-  console.log('Archivo subido exitosamente');
+  try {
+    console.log('llegó a la ruta');
+    const file = req.file.filename;
 
+    // Obtener la URL base desde las variables de entorno
+    const baseUrl = process.env.BASE_URL || 'http://localhost:7000';
+    const fileUrl = `${baseUrl}/${file}`;
+
+    console.log('Archivo subido exitosamente');
+    res.status(200).send(fileUrl);
+  } catch (err) {
+    res.status(400).send({ error: 'Error en la carga del archivo' });
+  }
 });
 
 // Middleware para manejar errores de Multer
 router.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
-    // Maneja errores específicos de Multer
-    res.status(500).send({ error: `Multer error: ${err.message}` });
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      res.status(413).send({ error: 'El archivo es demasiado grande. El límite es de 10 MB.' });
+    } else {
+      res.status(500).send({ error: `Multer error: ${err.message}` });
+    }
   } else if (err) {
-    // Maneja cualquier otro tipo de error
-    res.status(500).send({ error: `General error: ${err.message}` });
+    res.status(500).send({ error: `Error general: ${err.message}` });
   } else {
     next();
   }
 });
 
 module.exports = router;
-
-// router.post("/", upload.single("file"), (req, res) => {
-//   try {
-//     if (!req.file) {
-//       console.log('No Pudo Subir Archivo')
-//       res.status(400).send('No adjunto ningún archivo.');
-//     } else {
-//       const file = req.file.filename;
-//       console.log('Subio Archivo')
-//       res.status(200).send('https://apistoragews.sunnet.com.ar/' + file);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(400).send(error);
-//   }
-
-// });
-// module.exports = router;
