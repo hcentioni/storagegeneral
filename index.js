@@ -29,7 +29,8 @@ app.use(cors({
             'https://sunnetventas.com.ar',
             'https://sunnetpreventas.com.ar',
             'http://localhost',
-            'http://centioni.sunnetgestion.test'
+            'http://centioni.sunnetgestion.test',
+            'http://192.168.50.239'
         ];
         if (!origin || allowedDomains.some(domain => origin.startsWith(domain))) {
             callback(null, true);
