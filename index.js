@@ -14,7 +14,10 @@ const cron = require('node-cron');
 const app = express();
 
 // Configurar morgan para registrar las solicitudes HTTP
-app.use(morgan('combined'));  // Otras opciones: 'dev', 'tiny', etc.
+// Solo usa morgan en desarrollo
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('combined'));  // Otras opciones: 'dev', 'tiny', etc.
+  }
 // Configurar Swagger en tu aplicación
 setupSwagger(app);
 
